@@ -1,0 +1,9 @@
+org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+org.gradle.daemon=false
+org.gradle.parallel=false
+org.gradle.workers.max=1
+org.gradle.caching=true
+org.gradle.configuration-cache=false
+kotlin.incremental=false
+kotlin.daemon.jvm.options=-Xmx768m,-XX:MaxMetaspaceSize=384m
+kotlin.compiler.execution.strategy=in-process

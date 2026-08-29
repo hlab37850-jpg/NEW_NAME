@@ -1,0 +1,12 @@
+.dart_tool/
+build/
+.gradle/
+android/.gradle/
+android/local.properties
+android/app/build/
+android/app/.cxx/
+*.iml
+.idea/
+.DS_Store
+
+android.backup.*/
