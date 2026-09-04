@@ -7,6 +7,9 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.text.PDFTextStripper
 
 object PoiHelper {
 
@@ -63,5 +66,33 @@ object PoiHelper {
         }
         workbook.close()
         return sb.toString()
+    }
+
+    /**
+     * تهيئة PDFBox (يجب استدعاؤها مرة واحدة قبل قراءة ملفات PDF)
+     */
+    fun initPdfBox(context: Context) {
+        // PDFBox on Android requires resource initialization
+        PDFBoxResourceLoader.init(context.applicationContext)
+    }
+
+    /**
+     * قراءة نص من ملف PDF باستخدام PDFBox
+     */
+    fun readPdfContent(inputStream: InputStream): String {
+        var document: PDDocument? = null
+        return try {
+            document = PDDocument.load(inputStream)
+            val stripper = PDFTextStripper()
+            stripper.getText(document)
+        } catch (e: Exception) {
+            // أعاد رسالة خطأ قابلة للعرض بدلًا من رمي استثناء تُبطل البناء
+            throw e
+        } finally {
+            try {
+                document?.close()
+            } catch (_: Exception) {
+            }
+        }
     }
 }
