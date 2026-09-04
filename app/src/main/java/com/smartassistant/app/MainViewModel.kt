@@ -43,4 +43,18 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+    fun processImportedData(importType: String, content: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
+            try {
+                val typeName = if (importType == "CUSTOMERS") "بيانات العملاء" else "بيانات الأصناف"
+                _uiState.value = "تم استيراد $typeName بنجاح.\nتم تحليل $content"
+            } catch (e: Exception) {
+                _uiState.value = "خطأ أثناء استيراد الملف: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }

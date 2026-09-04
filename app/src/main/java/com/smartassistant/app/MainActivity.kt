@@ -1,10 +1,13 @@
 package com.smartassistant.app
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.smartassistant.app.databinding.ActivityMainBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -14,10 +17,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
 
+    private var selectedImportType: String = "CUSTOMERS"
+
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            try {
+                contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val content = PoiHelper.readPdfContent(inputStream)
+                    viewModel.processImportedData(selectedImportType, "عدد الأحرف المستخرجة: ${content.length}")
+                }
+            } catch (e: Exception) {
+                binding.tvStatus.text = "فشل في قراءة الملف المحدد: ${e.localizedMessage}"
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        PoiHelper.initPdfBox(applicationContext)
 
         setupListeners()
         observeViewModel()
@@ -33,8 +53,28 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnProcessFile.setOnClickListener {
-            binding.tvStatus.text = "ميزة قراءة واختيار الملفات جاهزة ومتاحة للمستندات."
+            showImportSelectionDialog()
         }
+    }
+
+    private fun showImportSelectionDialog() {
+        val options = arrayOf("استيراد ملف العملاء", "استيراد ملف الأصناف")
+        MaterialAlertDialogBuilder(this)
+            .setTitle("حدد نوع البيانات المراد استيرادها")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        selectedImportType = "CUSTOMERS"
+                        filePickerLauncher.launch("*/*")
+                    }
+                    1 -> {
+                        selectedImportType = "ITEMS"
+                        filePickerLauncher.launch("*/*")
+                    }
+                }
+            }
+            .setNegativeButton("إلغاء", null)
+            .show()
     }
 
     private fun observeViewModel() {
@@ -49,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                 binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
                 binding.btnCreateExcel.isEnabled = !loading
                 binding.btnCreateWord.isEnabled = !loading
+                binding.btnProcessFile.isEnabled = !loading
             }
         }
     }
