@@ -1,12 +1,22 @@
-package com.smartassistant.app.data
+package com.smartassistant.app.data.local
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.smartassistant.app.data.local.dao.CustomerDao
+import com.smartassistant.app.data.local.dao.ProductDao
+import com.smartassistant.app.data.local.dao.ShopSettingsDao
+import com.smartassistant.app.data.local.entity.CustomerEntity
+import com.smartassistant.app.data.local.entity.ProductEntity
+import com.smartassistant.app.data.local.entity.ShopSettingsEntity
 
 @Database(
-    entities = [Customer::class, Product::class, DueDate::class, ShopSettings::class],
+    entities = [
+        CustomerEntity::class,
+        ProductEntity::class,
+        ShopSettingsEntity::class
+    ],
     version = 1,
     exportSchema = false
 )
@@ -25,7 +35,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "smart_assistant_db"
-                ).fallbackToDestructiveMigration().build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
