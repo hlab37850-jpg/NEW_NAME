@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Material3.DayNight.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize your theme here -->
+    <!-- الثيم الرئيسي للتطبيق -->
+    <style name="Theme.SmartAssistant" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     </style>
+
+    <!-- تعريف البدائل المرجعية لمنع أخطاء AAPT -->
+    <style name="Theme.MaterialComponents.DayNight.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="Theme.Material3.DayNight.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
 </resources>
