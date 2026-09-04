@@ -7,30 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
-data class CustomerDebt(
-    val name: String,
-    val balance: Double
-)
+import com.smartassistant.app.data.ImportedCustomer
 
 @Composable
 fun CustomerDebtsScreen() {
-    var customers by remember { mutableStateOf<List<CustomerDebt>>(emptyList()) }
-
-    // محاكاة تحويل صفوف الملف مع تحسين الفهارس
-    fun parseImportedRow(row: List<Any>): CustomerDebt? {
-        if (row.size < 2) return null
-        
-        // تعديل الفهارس: 
-        // row[0] = التسلسل (يتم تجاهله)
-        // row[1] = اسم العميل
-        // row[2] = المبلغ/الرصيد
-        val name = row.getOrNull(1)?.toString()?.trim() ?: "عميل غير معروف"
-        val rawAmount = row.getOrNull(2)?.toString()?.replace(",", ".")?.trim() ?: "0.0"
-        val balance = rawAmount.toDoubleOrNull() ?: 0.0
-
-        return CustomerDebt(name = name, balance = balance)
-    }
+    var customers by remember { mutableStateOf<List<ImportedCustomer>>(emptyList()) }
 
     Column(
         modifier = Modifier
