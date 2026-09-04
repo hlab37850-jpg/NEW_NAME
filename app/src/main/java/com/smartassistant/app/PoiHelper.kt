@@ -45,9 +45,9 @@ object PoiHelper {
         }
     }
 
-    // --- توليد ملفات Excel بكافة الأنماط ---
+    // --- توليد ملفات Excel بكافة التواقيع الممكنة ---
 
-    fun createSampleExcelFile(outputStream: OutputStream) {
+    fun createSampleExcelFile(outputStream: OutputStream, fileName: String = "sample.xlsx") {
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet("Sheet1")
         val row = sheet.createRow(0)
@@ -56,18 +56,25 @@ object PoiHelper {
         workbook.close()
     }
 
+    fun createSampleExcelFile(context: Context, fileName: String = "sample.xlsx"): File {
+        val file = File(context.cacheDir, fileName)
+        FileOutputStream(file).use { os -> createSampleExcelFile(os, fileName) }
+        return file
+    }
+
+    fun createSampleExcelFile(parentDir: File, fileName: String): File {
+        val file = File(parentDir, fileName)
+        FileOutputStream(file).use { os -> createSampleExcelFile(os, fileName) }
+        return file
+    }
+
     fun createSampleExcelFile(file: File): File {
-        FileOutputStream(file).use { os -> createSampleExcelFile(os) }
+        FileOutputStream(file).use { os -> createSampleExcelFile(os, file.name) }
         return file
     }
 
     fun createSampleExcelFile(filePath: String): File {
         return createSampleExcelFile(File(filePath))
-    }
-
-    fun createSampleExcelFile(context: Context): File {
-        val file = File(context.cacheDir, "sample.xlsx")
-        return createSampleExcelFile(file)
     }
 
     fun createSampleExcelFile(): ByteArray {
@@ -76,9 +83,9 @@ object PoiHelper {
         return bos.toByteArray()
     }
 
-    // --- توليد ملفات Word بكافة الأنماط ---
+    // --- توليد ملفات Word بكافة التواقيع الممكنة ---
 
-    fun createSampleWordFile(outputStream: OutputStream) {
+    fun createSampleWordFile(outputStream: OutputStream, fileName: String = "sample.docx") {
         val document = XWPFDocument()
         val paragraph = document.createParagraph()
         val run = paragraph.createRun()
@@ -87,18 +94,25 @@ object PoiHelper {
         document.close()
     }
 
+    fun createSampleWordFile(context: Context, fileName: String = "sample.docx"): File {
+        val file = File(context.cacheDir, fileName)
+        FileOutputStream(file).use { os -> createSampleWordFile(os, fileName) }
+        return file
+    }
+
+    fun createSampleWordFile(parentDir: File, fileName: String): File {
+        val file = File(parentDir, fileName)
+        FileOutputStream(file).use { os -> createSampleWordFile(os, fileName) }
+        return file
+    }
+
     fun createSampleWordFile(file: File): File {
-        FileOutputStream(file).use { os -> createSampleWordFile(file) }
+        FileOutputStream(file).use { os -> createSampleWordFile(os, file.name) }
         return file
     }
 
     fun createSampleWordFile(filePath: String): File {
         return createSampleWordFile(File(filePath))
-    }
-
-    fun createSampleWordFile(context: Context): File {
-        val file = File(context.cacheDir, "sample.docx")
-        return createSampleWordFile(file)
     }
 
     fun createSampleWordFile(): ByteArray {
