@@ -10,11 +10,11 @@ import com.smartassistant.app.data.local.entity.CustomerEntity
 import com.smartassistant.app.data.local.entity.ProductEntity
 import com.smartassistant.app.data.local.entity.ShopSettingsEntity
 import com.smartassistant.app.data.parser.DataPreserver
+import com.smartassistant.app.data.parser.PdfParser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
+import kotlinx.coroutines.withContext
 
 data class AIMessage(val sender: String, val text: String, val timestamp: Long = System.currentTimeMillis())
 
@@ -45,16 +45,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteCustomer(customer: CustomerEntity) {
-        viewModelScope.launch { customerDao.deleteCustomer(customer) }
-    }
-
     fun addOrUpdateProduct(rawName: String, quantity: Double, minThreshold: Double) {
         viewModelScope.launch {
             val processed = DataPreserver.preserveProductText(rawName)
             productDao.insertProduct(
                 ProductEntity(rawName = processed.rawText, parsedName = processed.parsedSearchKey, currentQuantity = quantity, minThreshold = minThreshold)
             )
+        }
+    }
+
+    fun importCustomersFromPdf(context: Context, uri: Uri, onComplete: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val text = PdfParser.extractTextFromPdf(context, uri)
+            val customersList = PdfParser.parseCustomersPdf(text)
+            customersList.forEach { customerDao.insertCustomer(it) }
+            withContext(Dispatchers.Main) { onComplete(customersList.size) }
+        }
+    }
+
+    fun importInventoryFromPdf(context: Context, uri: Uri, onComplete: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val text = PdfParser.extractTextFromPdf(context, uri)
+            val productsList = PdfParser.parseInventoryPdf(text)
+            productsList.forEach { productDao.insertProduct(it) }
+            withContext(Dispatchers.Main) { onComplete(productsList.size) }
         }
     }
 
@@ -71,7 +85,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _aiMessages.value = currentList
 
         viewModelScope.launch {
-            val reply = "تم تحليل البيانات بنجاح: التطبيق جاهز لإصدار التقارير ومتابعة الأرصدة والمخزون."
+            val reply = "تم تحليل طلبك بنجاح! يمكنني مساعدتك في تصدير التقارير أو متابعة الأصناف والعملاء."
             val updatedList = _aiMessages.value.toMutableList()
             updatedList.add(AIMessage("ai", reply))
             _aiMessages.value = updatedList
