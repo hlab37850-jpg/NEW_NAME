@@ -1,58 +1,50 @@
 package com.smartassistant.app.ui.customers
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 data class CustomerDebt(
-    val id: Int,
     val name: String,
-    val phone: String,
     val balance: Double
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomerDebtsScreen(
-    onExportPdf: (CustomerDebt) -> Unit = {}
-) {
-    val context = LocalContext.current
-    val customers = remember {
-        listOf(
-            CustomerDebt(1, "أحمد علي", "770000000", 15000.0),
-            CustomerDebt(2, "محمد سعيد", "730000000", 8500.0),
-            CustomerDebt(3, "خالد عمر", "710000000", 42000.0)
-        )
+fun CustomerDebtsScreen() {
+    var customers by remember { mutableStateOf<List<CustomerDebt>>(emptyList()) }
+
+    // محاكاة تحويل صفوف الملف مع تحسين الفهارس
+    fun parseImportedRow(row: List<Any>): CustomerDebt? {
+        if (row.size < 2) return null
+        
+        // تعديل الفهارس: 
+        // row[0] = التسلسل (يتم تجاهله)
+        // row[1] = اسم العميل
+        // row[2] = المبلغ/الرصيد
+        val name = row.getOrNull(1)?.toString()?.trim() ?: "عميل غير معروف"
+        val rawAmount = row.getOrNull(2)?.toString()?.replace(",", ".")?.trim() ?: "0.0"
+        val balance = rawAmount.toDoubleOrNull() ?: 0.0
+
+        return CustomerDebt(name = name, balance = balance)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("إدارة العملاء والمستحقات") },
-                actions = {
-                    Icon(Icons.Default.People, contentDescription = null, modifier = Modifier.padding(8.dp))
-                }
-            )
-        }
-    ) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "قائمة العملاء والأرصدة",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(customers) { customer ->
                 Card(
@@ -63,28 +55,16 @@ fun CustomerDebtsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column {
-                            Text(text = customer.name, style = MaterialTheme.typography.titleMedium)
-                            Text(text = "المتبقي: ${customer.balance} ر.ي", color = MaterialTheme.colorScheme.primary)
-                        }
-
-                        Row {
-                            IconButton(onClick = { onExportPdf(customer) }) {
-                                Icon(Icons.Default.PictureAsPdf, contentDescription = "تصدير PDF", tint = MaterialTheme.colorScheme.error)
-                            }
-                            IconButton(onClick = {
-                                val message = "عزيزي ${customer.name}، نود تذكيركم بأن إجمالي المبالغ المتبقية عليكم هو ${customer.balance} ر.ي."
-                                val intent = Intent(Intent.ACTION_VIEW).apply {
-                                    data = Uri.parse("https://api.whatsapp.com/send?phone=${customer.phone}&text=${Uri.encode(message)}")
-                                }
-                                context.startActivity(intent)
-                            }) {
-                                Icon(Icons.Default.Send, contentDescription = "تذكير واتساب", tint = MaterialTheme.colorScheme.primary)
-                            }
-                        }
+                        Text(
+                            text = customer.name,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "YER ${customer.balance}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
