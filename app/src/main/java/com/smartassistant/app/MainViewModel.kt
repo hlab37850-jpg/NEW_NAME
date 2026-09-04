@@ -44,14 +44,21 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun processImportedData(importType: String, content: String) {
+    fun processPdfFile(importType: String, rawPdfText: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             try {
-                val typeName = if (importType == "CUSTOMERS") "بيانات العملاء" else "بيانات الأصناف"
-                _uiState.value = "تم استيراد $typeName بنجاح.\nتم تحليل $content"
+                if (importType == "CUSTOMERS") {
+                    val customers = PdfImportEngine.extractCustomers(rawPdfText)
+                    val sample = customers.take(3).joinToString("\n") { "• ${it.name} | هاتف: ${it.phone} | رصيد: ${it.balance}" }
+                    _uiState.value = "تم استخراج ${customers.size} عميل بنجاح خالي من العناوين والترويسات.\n\nعينات:\n$sample"
+                } else {
+                    val items = PdfImportEngine.extractItems(rawPdfText)
+                    val sample = items.take(3).joinToString("\n") { "• ${it.name} | السعر: ${it.price} | الكمية: ${it.quantity}" }
+                    _uiState.value = "تم استخراج ${items.size} صنف بنجاح خالي من العناوين والترويسات.\n\nعينات:\n$sample"
+                }
             } catch (e: Exception) {
-                _uiState.value = "خطأ أثناء استيراد الملف: ${e.localizedMessage}"
+                _uiState.value = "خطأ في تحليل محتوى PDF: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }

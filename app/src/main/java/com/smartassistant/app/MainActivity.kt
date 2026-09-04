@@ -23,11 +23,11 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             try {
                 contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val content = PoiHelper.readPdfContent(inputStream)
-                    viewModel.processImportedData(selectedImportType, "عدد الأحرف المستخرجة: ${content.length}")
+                    val rawText = PoiHelper.readPdfContent(inputStream)
+                    viewModel.processPdfFile(selectedImportType, rawText)
                 }
             } catch (e: Exception) {
-                binding.tvStatus.text = "فشل في قراءة الملف المحدد: ${e.localizedMessage}"
+                binding.tvStatus.text = "فشل في فتح وتطبيق المحرك على الملف: ${e.localizedMessage}"
             }
         }
     }
@@ -58,20 +58,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showImportSelectionDialog() {
-        val options = arrayOf("استيراد ملف العملاء", "استيراد ملف الأصناف")
+        val options = arrayOf("استيراد كشف العملاء (تصفية واستخراج تلقائي)", "استيراد كشف الأصناف (تصفية واستخراج تلقائي)")
         MaterialAlertDialogBuilder(this)
-            .setTitle("حدد نوع البيانات المراد استيرادها")
+            .setTitle("حدد نوع البيانات المراد تحليلها")
             .setItems(options) { _, which ->
-                when (which) {
-                    0 -> {
-                        selectedImportType = "CUSTOMERS"
-                        filePickerLauncher.launch("*/*")
-                    }
-                    1 -> {
-                        selectedImportType = "ITEMS"
-                        filePickerLauncher.launch("*/*")
-                    }
-                }
+                selectedImportType = if (which == 0) "CUSTOMERS" else "ITEMS"
+                filePickerLauncher.launch("application/pdf")
             }
             .setNegativeButton("إلغاء", null)
             .show()
