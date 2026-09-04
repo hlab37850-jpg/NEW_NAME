@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">المساعد الذكي</string>
+    <string name="app_name">المساعد الذكي Pro</string>
+    <string name="welcome_title">أهلاً بك في المساعد الذكي</string>
+    <string name="subtitle">قم بإدارة ومعالجة مستنداتك بكل سهولة وسرعة</string>
+    <string name="btn_create_excel">إنشاء جدول Excel جديد</string>
+    <string name="btn_create_word">إنشاء مستند Word جديد</string>
+    <string name="btn_process_file">معالجة وقراءة مستند</string>
+    <string name="status_ready">الحالة: جاهز للعمل</string>
 </resources>
